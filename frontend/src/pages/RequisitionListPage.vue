@@ -23,6 +23,7 @@
             <th>Title</th>
             <th>Status</th>
             <th>Needed By</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -35,6 +36,16 @@
               <span class="status-badge" :class="item.status.toLowerCase()">{{ item.status }}</span>
             </td>
             <td>{{ item.neededByDate || '-' }}</td>
+            <td>
+              <BookmarkButton
+                item-type="PR"
+                :item-id="item.id"
+                :item-label="item.prNumber"
+                :bookmarked="item.bookmarked"
+                @update:bookmarked="item.bookmarked = $event"
+                @error="errorMessage = $event"
+              />
+            </td>
           </tr>
         </tbody>
       </table>
@@ -46,6 +57,7 @@
 import { onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import { api } from '../api';
+import BookmarkButton from '../components/BookmarkButton.vue';
 
 const items = ref([]);
 const errorMessage = ref('');

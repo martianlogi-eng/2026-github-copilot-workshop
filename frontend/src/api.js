@@ -1,7 +1,11 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
+// The workshop baseline has no login flow, so every request identifies the
+// current user with a fixed id sent through the `x-user-id` header.
+export const CURRENT_USER_ID = import.meta.env.VITE_USER_ID || 'workshop-user';
+
 async function apiFetch(path, options = {}) {
-  const headers = { ...(options.headers || {}) };
+  const headers = { 'x-user-id': CURRENT_USER_ID, ...(options.headers || {}) };
   if (options.body) {
     headers['Content-Type'] = 'application/json';
   }
@@ -51,4 +55,14 @@ export const api = {
       method: 'POST',
     }),
   getRequisitionOpenLines: (id) => apiFetch(`/api/requisitions/${id}/open-lines`),
+  listBookmarks: () => apiFetch('/api/bookmarks'),
+  createBookmark: (itemType, itemId) =>
+    apiFetch('/api/bookmarks', {
+      method: 'POST',
+      body: JSON.stringify({ itemType, itemId }),
+    }),
+  removeBookmark: (itemType, itemId) =>
+    apiFetch(`/api/bookmarks/${itemType}/${itemId}`, {
+      method: 'DELETE',
+    }),
 };

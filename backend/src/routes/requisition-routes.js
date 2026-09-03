@@ -6,11 +6,13 @@ import {
   listRequisitions,
   submitRequisition,
 } from '../services/requisition-service.js';
+import { attachBookmarkFlags } from '../services/bookmark-service.js';
+import { getUserId } from '../utils/current-user.js';
 
 export default async function requisitionRoutes(fastify) {
   fastify.get('/api/requisitions', async (request, reply) => {
     const items = await listRequisitions(fastify.db);
-    return { items };
+    return { items: await attachBookmarkFlags(fastify.db, getUserId(request), 'PR', items) };
   });
 
   fastify.post('/api/requisitions', async (request, reply) => {

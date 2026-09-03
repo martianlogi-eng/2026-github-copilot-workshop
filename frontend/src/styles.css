@@ -367,6 +367,27 @@ td a {
 .dark-mode .status-badge.submitted { background: #4a2f12; color: #ffb74d; }
 .dark-mode .status-badge.approved { background: #17351f; color: #81c784; }
 
+.status-badge.type { background: var(--table-header); color: var(--text-muted); }
+.status-badge.posted { background: #e8f5e9; color: #2e7d32; }
+.dark-mode .status-badge.posted { background: #17351f; color: #81c784; }
+
+/* ===== Bookmark button ===== */
+.bookmark-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.bookmark-btn:hover { color: var(--primary); }
+.bookmark-btn.is-bookmarked { color: var(--primary); }
+.bookmark-btn:disabled { opacity: 0.5; cursor: progress; }
+
 /* ===== Utility ===== */
 .muted { color: var(--text-muted); font-size: 13px; }
 .error { color: #c62828; font-size: 13px; }
