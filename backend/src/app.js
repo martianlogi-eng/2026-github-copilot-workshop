@@ -1,5 +1,6 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
+import rateLimit from '@fastify/rate-limit';
 import dbPlugin from './plugins/db.js';
 import authPlugin from './plugins/auth.js';
 import requisitionRoutes from './routes/requisition-routes.js';
@@ -15,6 +16,13 @@ export function buildApp() {
     origin: true,
   });
 
+  // Global rate limiting is disabled by default; routes opt in via
+  // `config.rateLimit` (see the login route) to avoid over-throttling the
+  // rest of the workshop API.
+  app.register(rateLimit, {
+    global: false,
+  });
+
   app.register(dbPlugin);
   app.register(authPlugin);
   app.register(requisitionRoutes);
@@ -28,6 +36,11 @@ export function buildApp() {
   app.setErrorHandler((error, request, reply) => {
     request.log.error(error);
     if (reply.sent) {
+      return;
+    }
+
+    if (error.statusCode && error.statusCode < 500) {
+      reply.code(error.statusCode).send({ message: error.message });
       return;
     }
 
