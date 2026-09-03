@@ -2,11 +2,11 @@
 set -eu
 
 DB_ROOT="${WORKSHOP_DB_ROOT:-/workspace/db}"
-MIGRATION_FILE="$DB_ROOT/migrations/001_init_procurement_mvp.sql"
+MIGRATION_DIR="$DB_ROOT/migrations"
 SEED_FILE="$DB_ROOT/seeds/002_seed_procurement_mvp.sql"
 
-if [ ! -r "$MIGRATION_FILE" ]; then
-	echo "[initdb] ERROR: migration file not found: $MIGRATION_FILE" >&2
+if [ ! -d "$MIGRATION_DIR" ]; then
+	echo "[initdb] ERROR: migration directory not found: $MIGRATION_DIR" >&2
 	exit 1
 fi
 
@@ -16,7 +16,15 @@ if [ ! -r "$SEED_FILE" ]; then
 fi
 
 echo "[initdb] Running baseline migration..."
-psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f "$MIGRATION_FILE"
+for MIGRATION_FILE in "$MIGRATION_DIR"/*.sql; do
+	if [ ! -r "$MIGRATION_FILE" ]; then
+		echo "[initdb] ERROR: migration file not readable: $MIGRATION_FILE" >&2
+		exit 1
+	fi
+
+	echo "[initdb] Applying $MIGRATION_FILE"
+	psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f "$MIGRATION_FILE"
+done
 
 echo "[initdb] Seeding sample data..."
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f "$SEED_FILE"

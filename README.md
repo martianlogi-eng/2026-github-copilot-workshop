@@ -93,6 +93,27 @@ npm install
 npm run dev
 ```
 
+## Bookmark Feature
+
+Users can bookmark any `PR`, `PO`, or `GR` record and review them on the `Bookmarks` page.
+
+- Schema: `db/migrations/003_add_bookmarks.sql` creates the `bookmarks` table (unique per user + item type + item id).
+- The workshop baseline has no login flow, so the current user is sent by the frontend through the `x-user-id` header (`workshop-user` by default, override with `VITE_USER_ID`).
+- API endpoints:
+	- `GET /api/bookmarks` - list bookmarks of the current user
+	- `POST /api/bookmarks` - body `{ "itemType": "PR" | "PO" | "GR", "itemId": "<uuid>" }`
+	- `DELETE /api/bookmarks/:itemType/:itemId` - remove a bookmark
+- `GET /api/requisitions` and `GET /api/purchase-orders` include a `bookmarked` flag per item when the header is present.
+- Frontend: reusable `BookmarkButton` component (used by the PR list and reusable by the PO/GR lists) and the `Bookmarks` page at `/bookmarks`.
+
+Existing local databases need the new migration applied once:
+
+```bash
+docker compose exec -T db psql -U workshop -d procurement_mvp -f /workspace/db/migrations/003_add_bookmarks.sql
+```
+
+Fresh databases (`docker compose down -v && docker compose up -d db`) apply every file in `db/migrations` automatically.
+
 ## Validation Rules
 1. PO allocation qty must not exceed PR line remaining qty.
 2. PO status transition rules must be enforced.

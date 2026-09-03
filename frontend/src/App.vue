@@ -5,6 +5,7 @@
       <nav>
         <RouterLink to="/" :class="{ active: isDashboard }">Dashboard</RouterLink>
         <RouterLink to="/requisitions" :class="{ active: isRequisitions }">Purchase Requisitions</RouterLink>
+        <RouterLink to="/bookmarks" :class="{ active: isBookmarks }">Bookmarks</RouterLink>
       </nav>
       <button
         class="theme-toggle"
@@ -30,6 +31,7 @@ import { RouterLink, RouterView, useRoute } from 'vue-router';
 const route = useRoute();
 const isDashboard = computed(() => route.path === '/');
 const isRequisitions = computed(() => route.path.startsWith('/requisitions'));
+const isBookmarks = computed(() => route.path.startsWith('/bookmarks'));
 const isDarkMode = ref(localStorage.getItem('theme') === 'dark');
 
 function applyTheme() {

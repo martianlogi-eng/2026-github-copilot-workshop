@@ -5,11 +5,13 @@ import {
   listPurchaseOrders,
   submitPurchaseOrder,
 } from '../services/purchase-order-service.js';
+import { attachBookmarkFlags } from '../services/bookmark-service.js';
+import { getUserId } from '../utils/current-user.js';
 
 export default async function purchaseOrderRoutes(fastify) {
   fastify.get('/api/purchase-orders', async (request, reply) => {
     const items = await listPurchaseOrders(fastify.db);
-    return { items };
+    return { items: await attachBookmarkFlags(fastify.db, getUserId(request), 'PO', items) };
   });
 
   fastify.post('/api/purchase-orders', async (request, reply) => {
