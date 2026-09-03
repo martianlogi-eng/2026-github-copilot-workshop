@@ -4,11 +4,10 @@
       <div class="page-header-left">
         <RouterLink to="/" class="back-btn" title="Back to Dashboard">&#8592;</RouterLink>
         <div>
-          <h2>Purchase Requisitions</h2>
-          <p class="muted">All purchase requisition records</p>
+          <h2>Purchase Orders</h2>
+          <p class="muted">All purchase order records</p>
         </div>
       </div>
-      <RouterLink class="btn btn-outline" to="/requisitions/new">+ New PR</RouterLink>
     </div>
 
     <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
@@ -18,19 +17,17 @@
         <thead>
           <tr>
             <th style="width:44px"></th>
-            <th>PR Number</th>
-            <th>Requester</th>
-            <th>Department</th>
-            <th>Title</th>
+            <th>PO Number</th>
+            <th>Vendor</th>
             <th>Status</th>
-            <th>Needed By</th>
+            <th>Created</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="item in items" :key="item.id">
             <td>
               <BookmarkButton
-                entity-type="PR"
+                entity-type="PO"
                 :entity-id="item.id"
                 :bookmark-id="bookmarkIds.get(item.id)"
                 @bookmarked="(bm) => onBookmarked(item.id, bm)"
@@ -38,14 +35,12 @@
                 @error="onBookmarkError"
               />
             </td>
-            <td><RouterLink :to="`/requisitions/${item.id}`">{{ item.prNumber }}</RouterLink></td>
-            <td>{{ item.requesterName }}</td>
-            <td>{{ item.departmentName }}</td>
-            <td>{{ item.title }}</td>
+            <td><RouterLink :to="`/purchase-orders/${item.id}`">{{ item.poNumber }}</RouterLink></td>
+            <td>{{ item.vendorName }}</td>
             <td>
               <span class="status-badge" :class="item.status.toLowerCase()">{{ item.status }}</span>
             </td>
-            <td>{{ item.neededByDate || '-' }}</td>
+            <td>{{ item.createdAt ? new Date(item.createdAt).toLocaleDateString() : '-' }}</td>
           </tr>
         </tbody>
       </table>
@@ -86,7 +81,7 @@ async function loadBookmarkIds() {
     const payload = await api.listBookmarks();
     const map = new Map();
     payload.items
-      .filter((bookmark) => bookmark.entityType === 'PR')
+      .filter((bookmark) => bookmark.entityType === 'PO')
       .forEach((bookmark) => map.set(bookmark.entityId, bookmark.id));
     bookmarkIds.value = map;
   } catch (error) {
@@ -96,7 +91,7 @@ async function loadBookmarkIds() {
 
 onMounted(async () => {
   try {
-    const payload = await api.listRequisitions();
+    const payload = await api.listPurchaseOrders();
     items.value = payload.items;
   } catch (error) {
     errorMessage.value = error.message;

@@ -32,7 +32,9 @@ docker compose up -d db
 
 The PostgreSQL container now initializes the workshop baseline automatically:
 - Runs schema migration: `db/migrations/001_init_procurement_mvp.sql`
+- Runs the users/bookmarks migration: `db/migrations/002_add_users_and_bookmarks.sql`
 - Runs sample seed data: `db/seeds/002_seed_procurement_mvp.sql`
+- Runs demo user seed data: `db/seeds/003_seed_users.sql`
 - Uses Docker init script: `docker/postgres/init/00-init-mvp-db.sh`
 
 Cross-platform notes (Windows/macOS/Linux):
@@ -97,6 +99,16 @@ npm run dev
 1. PO allocation qty must not exceed PR line remaining qty.
 2. PO status transition rules must be enforced.
 3. GR validations are optional exploration after workshop backlog.
+
+## Bookmark Feature
+The bookmark extension is implemented on top of the baseline:
+- Minimal demo auth: `POST /api/auth/login` with a `username` (try `sari` or `budi` from the seed data) returns a bearer token used for subsequent bookmark requests. There is no password — this is intentionally simple for workshop clarity.
+- Bookmark APIs (all require an `Authorization` header carrying the login token as a bearer-style credential):
+  - `GET /api/bookmarks` — list the current user's bookmarks across PR/PO/GR
+  - `POST /api/bookmarks` — create a bookmark `{ entityType: 'PR'|'PO'|'GR', entityId }`
+  - `DELETE /api/bookmarks/:id` — remove one of the current user's bookmarks
+- Bookmarks are unique per `(user, entityType, entityId)` and enforced both by a DB constraint (`db/migrations/002_add_users_and_bookmarks.sql`) and the API (409 on duplicate).
+- The frontend `Bookmarks` page (`/bookmarks`) lists all bookmarked items and links to their detail pages where available. Bookmark toggle buttons are available on the PR, PO, and GR list pages.
 
 ## Suggested Workshop Output
 - Running baseline PR module + participant-completed PO module on Docker PostgreSQL
