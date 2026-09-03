@@ -1,4 +1,7 @@
+import { getToken } from './auth';
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+const AUTH_SCHEME = 'Bearer';
 
 async function apiFetch(path, options = {}) {
   const headers = { ...(options.headers || {}) };
@@ -6,10 +9,19 @@ async function apiFetch(path, options = {}) {
     headers['Content-Type'] = 'application/json';
   }
 
+  const token = getToken();
+  if (token) {
+    headers.Authorization = `${AUTH_SCHEME} ${token}`;
+  }
+
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
     headers,
   });
+
+  if (response.status === 204) {
+    return null;
+  }
 
   const contentType = response.headers.get('content-type') || '';
   const data = contentType.includes('application/json') ? await response.json() : null;
@@ -51,4 +63,26 @@ export const api = {
       method: 'POST',
     }),
   getRequisitionOpenLines: (id) => apiFetch(`/api/requisitions/${id}/open-lines`),
+
+  login: (username) =>
+    apiFetch('/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ username }),
+    }),
+
+  listPurchaseOrders: () => apiFetch('/api/purchase-orders'),
+  getPurchaseOrder: (id) => apiFetch(`/api/purchase-orders/${id}`),
+
+  listGoodsReceipts: () => apiFetch('/api/goods-receipts'),
+
+  listBookmarks: () => apiFetch('/api/bookmarks'),
+  createBookmark: (entityType, entityId) =>
+    apiFetch('/api/bookmarks', {
+      method: 'POST',
+      body: JSON.stringify({ entityType, entityId }),
+    }),
+  deleteBookmark: (id) =>
+    apiFetch(`/api/bookmarks/${id}`, {
+      method: 'DELETE',
+    }),
 };
